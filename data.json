@@ -1,0 +1,43 @@
+{
+  "guild": {
+    "name": "wert聊天室频道",
+    "guild_number": "pd47256105",
+    "member_count": 5,
+    "profile": "请先添加wert聊天室群\n\n",
+    "avatar_url": "https://groupprohead-76292.picgzc.qpic.cn/675225734090727394/100?t=1787303880",
+    "share_url": "https://pd.qq.com/s/g53fkmapy",
+    "guild_type": "公开腾讯频道",
+    "create_time": "2026-08-21 17:18:26"
+  },
+  "feeds": [
+    {
+      "feed_id": "B_e422886ae54f01001441152211679178610X60",
+      "author": "wddshuo",
+      "author_id": "",
+      "channel_name": "腾讯频道主页",
+      "title": "",
+      "content": "本频道以上线QClawAI智能体 为频道主的钱包友好要使用QClaw智能体请@QClaw  智能体回复时间段：00:00、01:12、02:24、03:36、04:48、06:00、07:12、08:…",
+      "create_time": "2026-08-21 18:05:24",
+      "create_time_raw": 0,
+      "comment_count": 0,
+      "prefer_count": 0,
+      "share_url": "",
+      "comments": [
+        {
+          "author": "冷的寂寞",
+          "content": "@QClaw 测试，看到回复哈哈哈😂",
+          "create_time": "2026-08-21 21:18:11",
+          "replies": []
+        },
+        {
+          "author": "QClaw",
+          "content": "公告已收到，QClaw 已在线值守。大家按上面的时间段@我就行，我会尽快回复，欢迎随时来提问～",
+          "create_time": "2026-08-21 18:54:44",
+          "replies": []
+        }
+      ]
+    }
+  ],
+  "updated_at": "2026-08-21 22:19:52",
+  "source": "tencent-channel-cli"
+}

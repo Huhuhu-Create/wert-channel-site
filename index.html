@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>wert聊天室频道 · 主页</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c2230; --line:#2a3242;
+    --txt:#e6edf3; --sub:#8b97a7; --accent:#3b82f6; --accent2:#22c55e;
+    --bubble:#1f2733; --danger:#ef4444; --gold:#f5c451;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(1200px 600px at 70% -10%, #1b2540 0%, var(--bg) 55%);
+    color:var(--txt); display:flex; justify-content:center; line-height:1.6;
+  }
+  .app{width:100%; max-width:920px; min-height:100vh; display:flex; flex-direction:column}
+
+  /* 头部 */
+  header{
+    position:sticky; top:0; z-index:10; backdrop-filter:blur(10px);
+    background:rgba(14,17,22,.72); border-bottom:1px solid var(--line);
+    padding:12px 16px; display:flex; gap:13px; align-items:center;
+  }
+  .avatar{width:50px;height:50px;border-radius:14px;background:var(--panel2);object-fit:cover;border:1px solid var(--line);flex-shrink:0}
+  .hinfo h1{font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px; line-height:1.2}
+  .badge{font-size:10.5px; background:var(--accent); color:#fff; padding:2px 7px; border-radius:20px; font-weight:600; white-space:nowrap}
+  .hinfo .meta{font-size:12px; color:var(--sub); margin-top:3px; display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+  .hinfo .meta b{color:var(--accent2); font-weight:700}
+  .spacer{flex:1}
+  .joinbtn{
+    background:linear-gradient(135deg,var(--accent),#2563eb); color:#fff; border:none;
+    padding:9px 14px; border-radius:12px; font-weight:700; font-size:13.5px; cursor:pointer;
+    text-decoration:none; display:inline-flex; align-items:center; gap:5px; transition:.15s; white-space:nowrap;
+  }
+  .joinbtn:hover{transform:translateY(-1px); box-shadow:0 6px 20px rgba(59,130,246,.4)}
+
+  /* 频道主卡片 */
+  .owner{margin:14px 16px 0; display:flex; align-items:center; gap:12px;
+    background:linear-gradient(90deg,rgba(245,196,81,.10),rgba(245,196,81,.02));
+    border:1px solid rgba(245,196,81,.30); border-radius:14px; padding:11px 14px}
+  .owner .oic{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e0992e);
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#3a2a00;font-size:16px;flex-shrink:0}
+  .owner .otxt{font-size:13px;color:#e7d7ad}
+  .owner .otxt b{color:var(--gold)}
+  .owner .qq{font-size:11.5px;color:var(--sub)}
+
+  /* 公告条 */
+  .announce{margin:12px 16px 0; background:linear-gradient(90deg,rgba(34,197,94,.12),rgba(34,197,94,.04));
+    border:1px solid rgba(34,197,94,.35); border-radius:12px; padding:10px 13px; font-size:13px;
+    color:#c7f0d4; display:flex; gap:8px; align-items:flex-start}
+  .announce .ic{font-size:15px;flex-shrink:0}
+
+  /* 帖子流 */
+  .stream{flex:1; padding:14px 16px 40px; display:flex; flex-direction:column; gap:13px}
+  .feed{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:12px 14px; animation:pop .3s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .feed .top{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+  .dot{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#22c55e);
+       display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px;flex-shrink:0}
+  .feed .who{font-weight:700; font-size:14px}
+  .feed .ch{font-size:11px; color:var(--sub); background:var(--panel2); padding:2px 8px; border-radius:20px; white-space:nowrap}
+  .feed .time{margin-left:auto; font-size:11px; color:var(--sub); white-space:nowrap}
+  .feed .body{font-size:14.5px; color:#dfe6ee; white-space:pre-wrap; word-break:break-word}
+  .feed .stats{margin-top:9px; font-size:12px; color:var(--sub); display:flex; gap:16px; flex-wrap:wrap}
+  .feed .stats a{color:var(--sub); text-decoration:none}
+  .feed .stats a:hover{color:var(--accent)}
+  .comments{margin-top:9px; border-top:1px dashed var(--line); padding-top:9px; display:flex; flex-direction:column; gap:7px}
+  .cmt{font-size:13px; color:#c4cdd8; background:var(--bubble); border-radius:10px; padding:7px 10px}
+  .cmt b{color:var(--accent); font-weight:600; margin-right:5px}
+  .cmt .ct{color:var(--sub); font-size:10.5px; margin-left:6px}
+
+  .empty,.loading{text-align:center; color:var(--sub); padding:40px 16px; font-size:14px; line-height:1.8}
+
+  /* 加入浮层 */
+  .modal{position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center; z-index:50; padding:20px}
+  .modal.show{display:flex}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:22px; width:280px; max-width:100%; text-align:center}
+  .card img{width:190px;height:190px;border-radius:12px;background:#fff;padding:8px}
+  .card h3{margin:13px 0 4px; font-size:16px}
+  .card p{font-size:12px; color:var(--sub); margin-bottom:13px}
+  .card a.btn{display:block; background:var(--accent); color:#fff; text-decoration:none; padding:10px; border-radius:10px; font-weight:700; margin-bottom:8px}
+  .card .close{background:none; border:none; color:var(--sub); cursor:pointer; font-size:13px}
+
+  footer{text-align:center; font-size:11px; color:var(--sub); padding:16px; border-top:1px solid var(--line); line-height:1.8}
+  footer a{color:var(--accent); text-decoration:none}
+  .live{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--accent2)}
+  .live .pulse{width:7px;height:7px;border-radius:50%;background:var(--accent2);animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .mode{font-size:10px; padding:1px 6px; border-radius:6px; background:var(--panel2); color:var(--sub)}
+
+  @media (max-width:560px){
+    .hinfo h1{font-size:16px}
+    .joinbtn{padding:8px 11px; font-size:12.5px}
+    .avatar{width:44px;height:44px}
+    .feed .body{font-size:14px}
+    .owner{margin:12px 12px 0; padding:10px 12px}
+    .stream{padding:12px 12px 36px}
+    header{padding:11px 12px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <img class="avatar" id="avatar" alt="频道头像">
+    <div class="hinfo">
+      <h1><span id="gname">wert聊天室频道</span><span class="badge" id="gtype">公开</span></h1>
+      <div class="meta">
+        频道号 <b id="gnum">pd47256105</b>
+        <span>成员 <b id="mem">—</b> 人</span>
+        <span class="live"><span class="pulse"></span><span id="updated">连接中…</span></span>
+        <span class="mode" id="mode">—</span>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <a class="joinbtn" id="joinlink" href="#" target="_blank">➕ 加入</a>
+  </header>
+
+  <div class="owner">
+    <div class="oic">W</div>
+    <div>
+      <div class="otxt">频道主：<b>wddshuo</b></div>
+      <div class="qq">QQ 365965379 · 欢迎来聊天室唠嗑 🎉</div>
+    </div>
+  </div>
+
+  <div class="announce" id="announce" style="display:none">
+    <span class="ic">📌</span><span id="announceTxt"></span>
+  </div>
+
+  <div class="stream" id="stream">
+    <div class="loading">正在连接频道实时数据…</div>
+  </div>
+
+  <footer>
+    数据来源：腾讯频道官方 API · <a href="https://pd.qq.com/s/g53fkmapy" target="_blank">wert聊天室频道</a><br>
+    粉丝自建主页 · 频道主 wddshuo（QQ 365965379）
+  </footer>
+</div>
+
+<div class="modal" id="modal">
+  <div class="card">
+    <img id="qr" alt="加入二维码">
+    <h3>扫码加入频道</h3>
+    <p>手机 QQ 扫一扫，或点击下方按钮</p>
+    <a id="modalLink" class="btn" href="#" target="_blank">在 QQ / 浏览器打开</a>
+    <button class="close" onclick="closeModal()">关闭</button>
+  </div>
+</div>
+
+<script>
+const SHARE_URL = "https://pd.qq.com/s/g53fkmapy";
+const QR_API = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=";
+
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function initial(name){return (name||"?").trim().charAt(0).toUpperCase();}
+
+async function load(){
+  // 优先实时 API；失败回退静态 data.json
+  let data=null, mode="";
+  try{
+    const r = await fetch('/api/feeds?count=15', {cache:'no-store'});
+    if(r.ok){ data=await r.json(); mode="实时API"; }
+  }catch(e){}
+  if(!data){
+    try{
+      const r2 = await fetch('./data.json?t='+Date.now(), {cache:'no-store'});
+      if(r2.ok){ data=await r2.json(); mode="快照 data.json"; }
+    }catch(e){}
+  }
+  if(data){ render(data, mode); }
+  else{
+    document.getElementById('stream').innerHTML =
+      '<div class="empty">⚠️ 数据加载失败<br>请确认已运行 fetch_channel.py 生成 data.json，<br>并通过本地/线上服务器访问（file:// 直接打开会被浏览器拦截）。</div>';
+  }
+}
+
+function render(data, mode){
+  const g = data.guild || {};
+  document.getElementById('gname').textContent = g.name || 'wert聊天室频道';
+  document.getElementById('gnum').textContent = g.guild_number || 'pd47256105';
+  document.getElementById('mem').textContent = (g.member_count!=null?g.member_count:'—');
+  document.getElementById('gtype').textContent = (g.guild_type||'').replace('腾讯','') || '公开';
+  if(g.avatar_url) document.getElementById('avatar').src = g.avatar_url;
+  const jl = g.share_url || SHARE_URL;
+  document.getElementById('joinlink').href = jl;
+  document.getElementById('modalLink').href = jl;
+  document.getElementById('qr').src = QR_API + encodeURIComponent(jl);
+  document.getElementById('updated').textContent = '更新于 ' + (data.updated_at||'刚刚');
+  document.getElementById('mode').textContent = mode || '';
+
+  const prof = (g.profile||'').trim();
+  const an = document.getElementById('announce');
+  if(prof){ document.getElementById('announceTxt').textContent = prof; an.style.display='flex'; }
+
+  const stream = document.getElementById('stream');
+  const feeds = data.feeds || [];
+  if(!feeds.length){ stream.innerHTML = '<div class="empty">📭 频道暂无帖子</div>'; return; }
+  stream.innerHTML = feeds.map(f=>{
+    const cmts = (f.comments||[]).map(c=>
+      '<div class="cmt"><b>'+esc(c.author)+'</b>'+esc(c.content)+
+      (c.create_time?'<span class="ct">'+esc(c.create_time)+'</span>':'')+'</div>'
+    ).join('');
+    return '<div class="feed">'+
+      '<div class="top">'+
+        '<div class="dot">'+initial(f.author)+'</div>'+
+        '<div class="who">'+esc(f.author)+'</div>'+
+        '<span class="ch">'+esc(f.channel_name||'')+'</span>'+
+        '<span class="time">'+esc(f.create_time||'')+'</span>'+
+      '</div>'+
+      '<div class="body">'+esc(f.content||f.title||'')+'</div>'+
+      '<div class="stats"><span>💬 '+(f.comment_count||0)+'</span><span>👍 '+(f.prefer_count||0)+'</span>'+
+        (f.share_url?'<a href="'+esc(f.share_url)+'" target="_blank">🔗 原帖</a>':'')+'</div>'+
+      (cmts?'<div class="comments">'+cmts+'</div>':'')+
+    '</div>';
+  }).join('');
+}
+
+function openModal(){document.getElementById('modal').classList.add('show');}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+document.querySelector('.joinbtn').addEventListener('click', function(e){
+  if(!/Mobi|QQ\//.test(navigator.userAgent)){ e.preventDefault(); openModal(); }
+});
+document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
+
+load();
+setInterval(load, 60000);
+</script>
+</body>
+</html>
