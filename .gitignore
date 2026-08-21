@@ -1,10 +1,10 @@
-﻿# 运行时日志/产物
+﻿# 运行时/调试产物
 lt.log
 logs/
 api_server.log
 *.err
 
-# 调试/抓包/证书(含敏感 token 测试产物)
+# 调试/抓包/证书
 ca_cert.pem
 ca_key.pem
 mitm.log
@@ -12,8 +12,13 @@ mitm.err
 proxy_capture.py
 proxy_mitm.py
 test_mcp.py
+test_mcp2.py
+test_mcp3.py
 probe_cred.ps1
 run_api_bg.bat
 launch-all.ps1
 
-# 旧迁移备注(可选保留)
+# 登录态(绝不可提交)
+.qqcli/
+login-qrcode.png
+*.env
