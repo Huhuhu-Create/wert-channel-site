@@ -66,6 +66,40 @@ tencent-channel-cli (需登录)
 由它对外提供 `/api/feeds` 接口，前端直接 `fetch` 该接口——那样数据永远最新。本仓库 `fetch_channel.py` 已封装好
 `get_guild_info / get_feeds / get_feed_detail / get_comments`，迁移到后端只需包一层 HTTP 服务。
 
+## 二-B、推送到 GitHub（建仓 + 上线）
+
+本地已 `git init + commit` 完成。由于本机无 GitHub 凭据，远程仓库需你手动创建并推送一次：
+
+```powershell
+# 1. 去 https://github.com/new 新建仓库，名字建议：wert-channel-site（勾不勾 README 都行）
+# 2. 把下面 <你的用户名> 替换成你的 GitHub 用户名，执行：
+cd wert-channel-site
+$git remote add origin https://github.com/<你的用户名>/wert-channel-site.git
+$git branch -M main
+$git push -u origin main
+# 首次 push 会弹窗/提示输入 GitHub 账号密码：
+#   - 密码处请填 Personal Access Token（PAT），不是登录密码
+#   - PAT 申请：GitHub → Settings → Developer settings → Personal access tokens → 勾 repo 权限
+```
+
+推送后：仓库 **Settings → Pages → Source 选 main 分支 /root → Save**，约 1~2 分钟上线。
+
+## 二-C、零维护实时 API（进阶，可选）
+
+`api_server.py` 是零依赖实时后端（仅标准库），对外提供 `GET /api/feeds`：
+
+```bash
+python api_server.py          # 本地 http://localhost:8000
+```
+
+前端 `index.html` **优先请求 `/api/feeds`**，失败自动回退 `data.json`，所以两种部署都能用：
+
+- **纯静态（GitHub Pages）**：靠 `fetch_channel.py` 周期生成 `data.json`，主页每 60s 轮询。
+- **带后端（Render / Railway / 任意能跑 py 的平台）**：部署 `api_server.py`，前端直接拿实时数据。
+
+> 云端运行需解决 CLI 登录态：把本机 `tencent-channel-cli` 的登录凭证（keychain/token）注入云环境，
+> 或使用官方机器人 AppID/Token 模式（见 `tencent-channel-cli` 文档）。这是唯一需要你处理的环境问题。
+
 ## 频道信息（实测）
 - 频道名：wert聊天室频道
 - 频道号：pd47256105
