@@ -152,10 +152,11 @@ def main():
     port = int(os.environ.get("PORT", "8000"))
     host = os.environ.get("HOST", "0.0.0.0")
     srv = ThreadingHTTPServer((host, port), Handler)
-    print(f"✅ wert频道实时API已启动: http://{host}:{port}")
-    print(f"   /api/feeds  实时数据接口")
-    print(f"   /           托管主页 (若同目录有 index.html)")
-    print(f"   缓存 TTL = {CACHE_TTL}s")
+    # 注意：Windows/云平台默认控制台可能是 GBK，emoji 会抛 UnicodeEncodeError，故用 ASCII
+    print("[wert] live API server started at http://%s:%s" % (host, port))
+    print("      /api/feeds  live data endpoint")
+    print("      /           serve homepage (if index.html present)")
+    print("      cache TTL = %ss" % CACHE_TTL)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
