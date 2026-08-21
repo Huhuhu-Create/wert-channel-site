@@ -84,6 +84,26 @@ $git push -u origin main
 
 推送后：仓库 **Settings → Pages → Source 选 main 分支 /root → Save**，约 1~2 分钟上线。
 
+## 二-D、GitHub Actions 每 2 分钟自动刷新（本机常驻，24/7 保活）
+
+目标：把 `fetch_channel.py` 排成定时任务，每 2 分钟重新生成 `data.json` 并 push 回仓库，Pages 主页即可近实时刷新（无需本机开 api_server.py）。
+
+> ⚠️ **关键限制**：`fetch_channel.py` 依赖 `tencent-channel-cli`，而 CLI 登录态绑定在**本机 Windows 凭据**（设备级加密，无法导出）。
+> 因此工作流必须用 **self-hosted runner**（跑在你自己的电脑上），纯云端 `ubuntu-latest` 会因“未登录”失败。
+> 这意味着：你电脑开机 + 该 runner 进程在线时，每 2 分钟自动刷新；电脑关机则停（与频道主公告“电脑开机时开启”一致）。
+
+### 在本机注册自托管 runner（一次性）
+1. 打开仓库 **Settings → Actions → Runners → New self-hosted runner → Windows**
+2. 复制页面上给出的命令，依次执行（会让你 `./run.cmd` 常驻，建议用 `./svc.sh` 或 `config.cmd --start` 装成服务，或保持终端开着）
+3. 确保本机已 `tencent-channel-cli login` 且 `login status` 显示 `valid:true`
+4. 推送本工作流文件后，Actions 会每 2 分钟在你电脑上跑一次 `fetch_channel.py`
+
+### 文件
+- `.github/workflows/refresh.yml` —— 调度配置（cron `*/2 * * * *` + 手动触发）
+
+### 想真·云端 24/7（电脑关机也跑）？
+需要改用**官方机器人 AppID/Secret** 直连 API，脱离本机 CLI 登录态。请先去申请官方机器人凭证，再让我改造 `fetch_channel.py`（把 CLI 调用换成官方 OpenAPI）。这是唯一能脱离本机的方案，但需你提供 AppID/Secret。
+
 ## 二-C、零维护实时 API（进阶，可选）
 
 `api_server.py` 是零依赖实时后端（仅标准库），对外提供 `GET /api/feeds`：
