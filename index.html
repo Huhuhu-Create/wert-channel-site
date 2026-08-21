@@ -158,19 +158,29 @@ const QR_API = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=";
 // 实时 API 地址：默认同源 /api/feeds（部署 api_server.py 时）；
 // 若把后端放到其他域名（如 cloudflared 隧道 / Render），改成该地址即可，已开启 CORS。
 const API_BASE = "/api/feeds";
-// 公网实时后端（本机 py 托管 + 隧道）：Pages 跨域直接拉这里。
-// 想换后端时：访问主页加 ?api=https://你的新地址/api/feeds 即可覆盖。
+// 默认公网实时后端（本机 py 托管 + 隧道）：Pages 跨域直接拉这里。
+// 优先读取同目录 api-config.json 里的 public_api（启动脚本会自动写入最新隧道地址）；
+// 其次本常量兜底；访问主页加 ?api=https://新地址/api/feeds 可被手动覆盖。
 const PUBLIC_API = "https://wert-channel.loca.lt/api/feeds";
 
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function initial(name){return (name||"?").trim().charAt(0).toUpperCase();}
 
 function resolveApiBase(){
-  // URL 参数 ?api= 优先；否则用 PUBLIC_API 公网后端；否则同源 /api/feeds
+  // 优先级：?api= > api-config.json.public_api > PUBLIC_API 常量 > 同源 /api/feeds
   const q = new URLSearchParams(location.search).get('api');
   if(q) return q;
+  if(window.__API_CONFIG__ && window.__API_CONFIG__.public_api) return window.__API_CONFIG__.public_api;
   return PUBLIC_API || API_BASE;
 }
+
+// 启动时异步加载 api-config.json（若不存在则用常量兜底，不影响静态回退）
+let _cfgLoaded = (async function(){
+  try{
+    const r = await fetch('./api-config.json?t='+Date.now(), {cache:'no-store'});
+    if(r.ok){ window.__API_CONFIG__ = await r.json(); }
+  }catch(e){}
+})();
 
 async function load(){
   const base = resolveApiBase();
