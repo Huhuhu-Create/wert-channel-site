@@ -155,15 +155,29 @@
 <script>
 const SHARE_URL = "https://pd.qq.com/s/g53fkmapy";
 const QR_API = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=";
+// 实时 API 地址：默认同源 /api/feeds（部署 api_server.py 时）；
+// 若把后端放到其他域名（如 cloudflared 隧道 / Render），改成该地址即可，已开启 CORS。
+const API_BASE = "/api/feeds";
+// 公网实时后端（本机 py 托管 + 隧道）：Pages 跨域直接拉这里。
+// 想换后端时：访问主页加 ?api=https://你的新地址/api/feeds 即可覆盖。
+const PUBLIC_API = "https://wert-channel.loca.lt/api/feeds";
 
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function initial(name){return (name||"?").trim().charAt(0).toUpperCase();}
 
+function resolveApiBase(){
+  // URL 参数 ?api= 优先；否则用 PUBLIC_API 公网后端；否则同源 /api/feeds
+  const q = new URLSearchParams(location.search).get('api');
+  if(q) return q;
+  return PUBLIC_API || API_BASE;
+}
+
 async function load(){
+  const base = resolveApiBase();
   // 优先实时 API；失败回退静态 data.json
   let data=null, mode="";
   try{
-    const r = await fetch('/api/feeds?count=15', {cache:'no-store'});
+    const r = await fetch(base + '?count=15', {cache:'no-store'});
     if(r.ok){ data=await r.json(); mode="实时API"; }
   }catch(e){}
   if(!data){
