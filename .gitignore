@@ -1,11 +1,19 @@
-# 运行时生成的缓存（可选，保留也可）
-# data.json
+﻿# 运行时日志/产物
+lt.log
+logs/
+api_server.log
+*.err
 
-# Python
-__pycache__/
-*.pyc
+# 调试/抓包/证书(含敏感 token 测试产物)
+ca_cert.pem
+ca_key.pem
+mitm.log
+mitm.err
+proxy_capture.py
+proxy_mitm.py
+test_mcp.py
+probe_cred.ps1
+run_api_bg.bat
+launch-all.ps1
 
-# 本地数据快照不含敏感信息，可纳入版本库
-
-# ��ʱ�ų�: �� workflow Ȩ�� PAT �������ټ���
-.github/workflows/refresh.yml
+# 旧迁移备注(可选保留)
