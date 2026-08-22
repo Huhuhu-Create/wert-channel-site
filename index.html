@@ -162,24 +162,18 @@ const API_BASE = "/api/feeds";
 // 默认公网实时后端（本机 py 托管 + 隧道）：Pages 跨域直接拉这里。
 // 优先读取同目录 api-config.json 里的 public_api（启动脚本会自动写入最新隧道地址）；
 // 其次本常量兜底；访问主页加 ?api=https://新地址/api/feeds 可被手动覆盖。
-const PUBLIC_API = "https://wert-channel.loca.lt/api/feeds";
+const PUBLIC_API = "http://localhost:8000/api/feeds";
 
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function initial(name){return (name||"?").trim().charAt(0).toUpperCase();}
 
 function resolveApiBase(){
-  // 优先级：?api= > api-config.json.public_api > PUBLIC_API 常量 > 同源 /api/feeds
-  const q = new URLSearchParams(location.search).get('api');
-  if(q) return q;
-  if(window.__API_CONFIG__ && window.__API_CONFIG__.public_api) return window.__API_CONFIG__.public_api;
-  return PUBLIC_API || API_BASE;
-}
-
-// 启动时异步加载 api-config.json（若不存在则用常量兜底，不影响静态回退）
-let _cfgLoaded = (async function(){
-  try{
-    const r = await fetch('./api-config.json?t='+Date.now(), {cache:'no-store'});
-    if(r.ok){ window.__API_CONFIG__ = await r.json(); }
+    // 本地 py 优先；未开启则回退 data.json。?api= 可手动覆盖；api-config.json 作可选备用。
+    const q = new URLSearchParams(location.search).get('api');
+    if(q) return q;
+    if(PUBLIC_API) return PUBLIC_API;            // 本地 py: http://localhost:8000/api/feeds
+    if(window.__API_CONFIG__ && window.__API_CONFIG__.public_api) return window.__API_CONFIG__.public_api;
+    return API_BASE;
   }catch(e){}
 })();
 
