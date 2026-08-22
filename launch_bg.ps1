@@ -1,6 +1,6 @@
-# launch_bg.ps1 (ASCII) - wert频道实时后端 本机24h常驻启动器
-# 功能: 拉起 api_server.py(8000) + localtunnel 隧道 + 双向保活 + 自动写 api-config.json
-# 用法: 直接运行, 或放进 Startup 文件夹实现登录自启
+# launch_bg.ps1 - wert channel realtime backend 24h daemon
+# start api_server.py(8000) + localtunnel, keepalive both, sync api-config.json
+# run directly, or put in Startup folder for login autostart
 
 $ErrorActionPreference = "Continue"
 $root = "D:\QClaw\rrr"
@@ -11,10 +11,8 @@ $py = "C:\Users\15838\AppData\Local\Python\pythoncore-3.14-64\python.exe"
 $nodeDir = "D:\QClaw\v0.2.36.629\resources\openclaw\config\bin\node"
 $env:PATH = $nodeDir + ";" + $env:PATH
 $sub = "wert-channel"
-$logDir = Join-Path $root "logs"; if(-not (Test-Path $logDir)){ New-Item -ItemType Directory -Path $logDir | Out-Null }
 
 function Start-Backend {
-  # 先看端口是否在监听, 在就不用拉
   $portAlive = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue
   if ($portAlive) { return $null }
   $p = Start-Process -FilePath $py -ArgumentList "$root\api_server.py" -PassThru
@@ -31,22 +29,18 @@ $bp = Start-Backend
 $tp = Start-Tunnel
 Start-Sleep -Seconds 12
 
-# 主保活循环: 每15秒检测, 进程/端口掉了就重启; 隧道地址变了就更新 api-config.json
 while ($true) {
-  # 后端存活检测 (看端口, 掉了就拉起)
   $portAlive = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue
   if (-not $portAlive) {
     Write-Host ("[$(Get-Date -Format HH:mm:ss)] backend port 8000 down, restarting")
     $bp = Start-Backend
     Start-Sleep -Seconds 8
   }
-  # 隧道存活检测
   if ($tp.HasExited) {
     Write-Host ("[$(Get-Date -Format HH:mm:ss)] tunnel exited, restarting")
     $tp = Start-Tunnel
     Start-Sleep -Seconds 10
   }
-  # 读取隧道真实地址
   $url = $null
   if (Test-Path "lt.log") {
     $line = (Get-Content "lt.log" -Tail 3 | Select-String "your url is:").ToString()
